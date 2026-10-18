@@ -1,0 +1,17 @@
+{
+    "name": "niongeraghty/gestion-reservas",
+    "description": "Aplicación de gestión de reservas de alojamiento en PHP nativo",
+    "type": "project",
+    "authors": [
+        {
+            "name": "NionGeraghty",
+            "email": "geraghnb@tcd.ie"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "require": {}
+}
