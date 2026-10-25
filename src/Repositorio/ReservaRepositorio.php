@@ -20,4 +20,20 @@ class ReservaRepositorio
 
         return $fila === false ? null : $fila;
     }
+
+    public function crear(array $valores): int
+    {
+        $stmt = $this->pdo->prepare('INSERT INTO reserva (nombre_huesped, email_huesped, nombre_alojamiento, fecha_entrada, fecha_salida, importe, notas)
+            VALUES (:nombre_huesped, :email_huesped, :nombre_alojamiento, :fecha_entrada, :fecha_salida, :importe, :notas)');
+        $stmt->execute([
+            'nombre_huesped'=>$valores["nombre_huesped"], 
+            'email_huesped'=>$valores["email_huesped"], 
+            'nombre_alojamiento'=>$valores["nombre_alojamiento"], 
+            'fecha_entrada'=>$valores["fecha_entrada"], 
+            'fecha_salida'=>$valores["fecha_salida"], 
+            'importe'=>$valores["importe"], 
+            'notas'=>$valores["notas"] ?? null
+            ]);
+        return intval($this->pdo->lastInsertId());
+    }
 }

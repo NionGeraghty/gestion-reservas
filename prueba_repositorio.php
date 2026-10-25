@@ -16,5 +16,14 @@ $bd = new App\BaseDatos(
 
 $repositorio = new App\Repositorio\ReservaRepositorio($bd->conexion());
 
-var_dump($repositorio->buscarPorId(2));
-var_dump($repositorio->buscarPorId(999));
+$nuevaId = $repositorio->crear([
+    'nombre_huesped' => 'Prueba Pérez',
+    'email_huesped' => 'prueba@example.com',
+    'nombre_alojamiento' => 'Casa Rural El Robledal',
+    'fecha_entrada' => '2026-12-10',
+    'fecha_salida' => '2026-12-12',
+    'importe' => '180.00',
+]);
+
+var_dump($nuevaId);
+var_dump($repositorio->buscarPorId($nuevaId));
