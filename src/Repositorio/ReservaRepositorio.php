@@ -44,4 +44,41 @@ class ReservaRepositorio
             WHERE id = :id');
         $stmt->execute(['estado'=>$nuevoEstado, 'id'=>$id]);
     }
+
+    public function buscar(array $filtros): array
+    {
+        $valoresArray = [];
+        $condiciones = [];
+
+        if(isset($filtros["estado"]))
+            {
+                array_push($condiciones, 'estado = :estado');
+                $valoresArray["estado"] = $filtros["estado"];
+            }
+        if(isset($filtros["nombre_huesped"]))
+            {
+                array_push($condiciones, 'nombre_huesped LIKE :nombre_huesped'); 
+                $valoresArray["nombre_huesped"] = '%' . $filtros["nombre_huesped"] . '%';
+            }
+        if(isset($filtros["desde"]))
+            {
+                array_push($condiciones, 'fecha_entrada <= :hasta and fecha_salida >= :desde');
+                $valoresArray["desde"] = $filtros["desde"];
+                $valoresArray["hasta"] = $filtros["hasta"];
+            }
+
+        $stmtString = 'SELECT * FROM reserva';
+
+        if(count($condiciones) !== 0)
+            {
+                $stmtString = $stmtString . ' WHERE ' . implode(' AND ', $condiciones);
+            }
+
+        $stmtString = $stmtString . ' ORDER BY fecha_entrada, id';
+
+        $stmt = $this->pdo->prepare($stmtString);
+        $stmt->execute($valoresArray);
+
+        return $stmt->fetchAll();
+    }
 }

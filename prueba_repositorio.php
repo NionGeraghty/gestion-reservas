@@ -16,7 +16,8 @@ $bd = new App\BaseDatos(
 
 $repositorio = new App\Repositorio\ReservaRepositorio($bd->conexion());
 
-$repositorio->actualizarEstado(1, 'confirmada');
-var_dump($repositorio->buscarPorId(1)['estado']);
-
-$repositorio->actualizarEstado(1, 'inventado');
+echo "Sin filtros: " . count($repositorio->buscar([])) . "\n";
+echo "Confirmadas: " . count($repositorio->buscar(['estado' => 'confirmada'])) . "\n";
+echo "Nombre 'maria': " . count($repositorio->buscar(['nombre_huesped' => 'maria'])) . "\n";
+echo "Del 25/10 al 31/10: " . count($repositorio->buscar(['desde' => '2026-10-25', 'hasta' => '2026-10-31'])) . "\n";
+echo "Confirmadas + fechas: " . count($repositorio->buscar(['estado' => 'confirmada', 'desde' => '2026-10-25', 'hasta' => '2026-10-31'])) . "\n";
