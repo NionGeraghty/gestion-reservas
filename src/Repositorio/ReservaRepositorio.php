@@ -36,4 +36,12 @@ class ReservaRepositorio
             ]);
         return intval($this->pdo->lastInsertId());
     }
+
+    public function actualizarEstado(int $id, string $nuevoEstado): void
+    {
+        $stmt = $this->pdo->prepare('UPDATE reserva
+            SET estado = :estado
+            WHERE id = :id');
+        $stmt->execute(['estado'=>$nuevoEstado, 'id'=>$id]);
+    }
 }
