@@ -14,10 +14,10 @@ $bd = new App\BaseDatos(
     $_ENV['DB_PASS'],
 );
 
-$repositorio = new App\Repositorio\ReservaRepositorio($bd->conexion());
+$eventos = new App\Repositorio\EventoRepositorio($bd->conexion());
 
-echo "Sin filtros: " . count($repositorio->buscar([])) . "\n";
-echo "Confirmadas: " . count($repositorio->buscar(['estado' => 'confirmada'])) . "\n";
-echo "Nombre 'maria': " . count($repositorio->buscar(['nombre_huesped' => 'maria'])) . "\n";
-echo "Del 25/10 al 31/10: " . count($repositorio->buscar(['desde' => '2026-10-25', 'hasta' => '2026-10-31'])) . "\n";
-echo "Confirmadas + fechas: " . count($repositorio->buscar(['estado' => 'confirmada', 'desde' => '2026-10-25', 'hasta' => '2026-10-31'])) . "\n";
+$eventos->crear(1, 'confirmada', 'Reserva confirmada');
+
+foreach ($eventos->buscarPorReserva(1) as $evento) {
+    echo $evento['fecha_creacion'] . ' — ' . $evento['tipo'] . "\n";
+}
