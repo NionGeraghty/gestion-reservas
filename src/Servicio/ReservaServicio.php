@@ -5,9 +5,11 @@ namespace App\Servicio;
 
 use App\Excepcion\DatosNoValidos;
 use App\Excepcion\RecursoNoEncontrado;
+use App\Excepcion\TransicionNoPermitida;
 use App\Repositorio\EventoRepositorio;
 use App\Repositorio\ReservaRepositorio;
 use App\Validacion\ReservaValidator;
+use App\Modelo\EstadoReserva;
 use PDO;
 use Throwable;
 
@@ -67,6 +69,34 @@ class ReservaServicio
             throw $e;
         }
         
+        return $this->obtener($reservaId);
+    }
+
+    public function cambiarEstado(int $reservaId, string $nuevoEstado): array
+    {
+        $estadoNuevo = EstadoReserva::tryFrom($nuevoEstado);
+        if(!$estadoNuevo)
+            {
+                throw new DatosNoValidos(['estado' => 'El estado no es válido']);
+            }
+        $this->pdo->beginTransaction();
+
+        try{
+            $reserva = $this->obtener($reservaId);
+            $estadoActual = EstadoReserva::from($reserva["estado"]);
+            if(!$estadoActual->puedeCambiar($estadoNuevo))
+                {
+                    throw new TransicionNoPermitida("No se puede pasar de {$estadoActual->value} a {$estadoNuevo->value}");
+                }
+
+            $this->reservas->actualizarEstado($reservaId, $nuevoEstado);
+            $this->eventos->crear($reservaId, $nuevoEstado, "Reserva {$estadoNuevo->value}");
+            $this->pdo->commit();
+
+        } catch(Throwable $e){
+            $this->pdo->rollBack();
+            throw $e;
+        }
         return $this->obtener($reservaId);
     }
 }
