@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace App\Servicio;
 
+use App\Excepcion\DatosNoValidos;
 use App\Excepcion\RecursoNoEncontrado;
 use App\Repositorio\EventoRepositorio;
 use App\Repositorio\ReservaRepositorio;
 use App\Validacion\ReservaValidator;
 use PDO;
+use Throwable;
 
 class ReservaServicio
 {
@@ -29,5 +31,28 @@ class ReservaServicio
             }
         $reserva["eventos"] = $this->eventos->buscarPorReserva($id);
         return $reserva;
+    }
+    
+    public function crear(array $valores): array
+    {
+        $errores = $this->validator->validarCreacion($valores); //Verificar los datos están bien
+
+        if($errores !== [])
+            {
+                throw new DatosNoValidos($errores); 
+            }
+
+        $this->pdo->beginTransaction();
+
+        try{
+            $reservaId = $this->reservas->crear($valores);
+            $this->eventos->crear($reservaId, "creada", "Reserva creada");
+            $this->pdo->commit();
+        } catch(Throwable $e){
+            $this->pdo->rollBack();
+            throw $e;
+        }
+        
+        return $this->obtener($reservaId);
     }
 }
