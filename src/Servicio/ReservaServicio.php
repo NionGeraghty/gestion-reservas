@@ -21,6 +21,18 @@ class ReservaServicio
         private ReservaValidator $validator,
     ){}
 
+    private function limpiarArray(array $valores): array
+    {
+        $valores["nombre_huesped"] = trim($valores["nombre_huesped"]);
+        $valores["email_huesped"] = trim($valores["email_huesped"]);
+        $valores["nombre_alojamiento"] = trim($valores["nombre_alojamiento"]);
+        if(isset($valores["notas"]))
+            {
+                $valores["notas"] = trim($valores["notas"]);
+            }
+        return $valores;
+    }
+
     public function obtener(int $id): array
     {
         $reserva = $this->reservas->buscarPorId($id);
@@ -41,6 +53,8 @@ class ReservaServicio
             {
                 throw new DatosNoValidos($errores); 
             }
+
+        $valores = $this->limpiarArray($valores);
 
         $this->pdo->beginTransaction();
 
