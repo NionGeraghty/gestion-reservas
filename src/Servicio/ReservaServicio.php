@@ -10,6 +10,7 @@ use App\Repositorio\EventoRepositorio;
 use App\Repositorio\ReservaRepositorio;
 use App\Validacion\ReservaValidator;
 use App\Modelo\EstadoReserva;
+use DateTimeImmutable;
 use PDO;
 use Throwable;
 
@@ -98,5 +99,16 @@ class ReservaServicio
             throw $e;
         }
         return $this->obtener($reservaId);
+    }
+
+    public function listar(array $filtros): array
+    {
+        $errores = $this->validator->validarFiltros($filtros);
+        if($errores !== [])
+            {
+                throw new DatosNoValidos($errores);
+            }
+
+        return $this->reservas->buscar($filtros);
     }
 }

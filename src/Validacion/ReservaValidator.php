@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Validacion;
 
+use App\Modelo\EstadoReserva;
 use DateTimeImmutable;
 
 class ReservaValidator
@@ -72,48 +73,38 @@ class ReservaValidator
             }
 
         //fechas
-        $fecha_entrada_bien = false;
-        $fecha_salida_bien = false;
+        $fecha_entrada = null;
+        $fecha_salida = null;
 
         $texto_entrada = $datos["fecha_entrada"] ?? "";
-        if(!is_string($texto_entrada))
-            {
-                $errores["fecha_entrada"] = "La fecha de entrada no es válida";
-            }
-        else if($texto_entrada==="")
+        if($texto_entrada==="")
             {
                 $errores["fecha_entrada"] = "La fecha de entrada es obligatoria";
             }
         else
             {
-                $fecha_entrada = DateTimeImmutable::createFromFormat('!Y-m-d', $texto_entrada);
-                if(!$fecha_entrada || $fecha_entrada->format('Y-m-d') !== $texto_entrada)
+                $fecha_entrada = $this->leerFecha($texto_entrada);
+                if($fecha_entrada===null)
                     {
                         $errores["fecha_entrada"] = "La fecha de entrada no es válida";
                     }
-                else {$fecha_entrada_bien=true;}
             }
 
         $texto_salida = $datos["fecha_salida"] ?? "";
-        if(!is_string($texto_salida))
-            {
-                $errores["fecha_salida"] = "La fecha de salida no es válida";
-            }
-        else if($texto_salida==="")
+        if($texto_salida==="")
             {
                 $errores["fecha_salida"] = "La fecha de salida es obligatoria";
             }
         else
             {
-                $fecha_salida = DateTimeImmutable::createFromFormat('!Y-m-d', $texto_salida);
-                if(!$fecha_salida || $fecha_salida->format('Y-m-d') !== $texto_salida)
+                $fecha_salida = $this->leerFecha($texto_salida);
+                if($fecha_salida===null)
                     {
                         $errores["fecha_salida"] = "La fecha de salida no es válida";
                     }
-                else {$fecha_salida_bien=true;}
             }
 
-        if($fecha_entrada_bien && $fecha_salida_bien)
+        if($fecha_entrada!==null && $fecha_salida!==null)
             {
                 $hoy = new DateTimeImmutable('today');
                 if($fecha_salida<=$fecha_entrada)
@@ -164,5 +155,83 @@ class ReservaValidator
             }
 
         return $errores;
+    }
+
+    public function validarFiltros(array $filtros): array
+    {
+        $errores = [];
+
+        //estado
+        if(isset($filtros["estado"]))
+            {
+                $estado = $filtros["estado"];
+                if(!is_string($estado) || EstadoReserva::tryFrom($estado)===null)
+                    {
+                        $errores["estado"] = "El estado no es válido";
+                    }
+            }
+
+        //nombre_huesped
+        if(isset($filtros["nombre_huesped"]))
+            {
+                $nombre = $filtros["nombre_huesped"];
+                if(!is_string($nombre))
+                    {
+                        $errores["nombre_huesped"] = "La búsqueda no es válida";
+                    }
+                else if(mb_strlen($nombre)>100)
+                    {
+                        $errores["nombre_huesped"] = "La búsqueda es demasiado larga";
+                    }
+            }
+
+        //fechas
+        $desde = isset($filtros["desde"]);
+        $hasta = isset($filtros["hasta"]);
+
+        if($desde && !$hasta)
+            {
+                $errores["hasta"] = "Indica también la fecha final";
+            }
+        else if(!$desde && $hasta)
+            {
+                $errores["desde"] = "Indica también la fecha inicial";
+            }
+        else if($desde && $hasta)
+            {
+                $desde = $this->leerFecha($filtros["desde"]);
+                $hasta = $this->leerFecha($filtros["hasta"]);
+
+                if($desde===null)
+                    {
+                        $errores["desde"] = "La fecha inicial no es válida";
+                    }
+                if($hasta===null)
+                    {
+                        $errores["hasta"] = "La fecha final no es válida";
+                    }
+                if($desde!==null && $hasta!==null && $hasta<$desde)
+                    {
+                        $errores["hasta"] = "La fecha final no puede ser anterior a la inicial";
+                    }
+            }
+
+        return $errores;
+    }
+
+    private function leerFecha(mixed $valor): ?DateTimeImmutable
+    {
+        if(!is_string($valor))
+            {
+                return null;
+            }
+
+        $fecha = DateTimeImmutable::createFromFormat('!Y-m-d', $valor);
+        if($fecha===false || $fecha->format('Y-m-d')!==$valor)
+            {
+                return null;
+            }
+
+        return $fecha;
     }
 }
