@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 use App\BaseDatos;
+use App\Http\ReservaApiController;
 use App\Http\Router;
 use App\Repositorio\EventoRepositorio;
 use App\Repositorio\ReservaRepositorio;
@@ -35,17 +36,8 @@ $metodo = $_SERVER['REQUEST_METHOD'];
 $ruta = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 $router = new Router();
+$apiController = new ReservaApiController($servicio);
 
-$router->agregar("GET", '#^/api/reservas/(\d+)$#', function (string $x){return "It worked $x";});
+$router->agregar("GET", '#^/api/reservas$#', function () use($apiController) {$apiController->listar($_GET);});
 
-echo $router->despachar($metodo, $ruta);
-
-/*if(preg_match('#^/api/reservas/(\d+)$#', $ruta, $coincidencias))
-    {
-        echo "$coincidencias[0] $coincidencias[1]";
-    }
-
-if(preg_match('#^/api/reservas/(\d+)/estado$#', $ruta, $coincidencias))
-    {
-        echo "inside the estado";
-    }*/
+$router->despachar($metodo, $ruta);
