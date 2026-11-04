@@ -39,5 +39,6 @@ $router = new Router();
 $apiController = new ReservaApiController($servicio);
 
 $router->agregar("GET", '#^/api/reservas$#', function () use($apiController) {$apiController->listar($_GET);});
+$router->agregar("GET", '#^/api/reservas/(\d+)$#', function (string $id) use($apiController) {$apiController->obtener($id);});
 
 $router->despachar($metodo, $ruta);

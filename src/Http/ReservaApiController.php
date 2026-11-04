@@ -22,4 +22,11 @@ class ReservaApiController
         $reservas = $this->servicio->listar($filtros);
         $this->responder($reservas);
     }
+
+    public function obtener(string $id): void
+    {
+        $id = intval($id);
+        $reserva = $this->servicio->obtener($id);
+        $this->responder($reserva);
+    }
 }
