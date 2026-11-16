@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Http;
 
+use App\Excepcion\DatosNoValidos;
 use App\Servicio\ReservaServicio;
 
 class ReservaApiController
@@ -28,5 +29,16 @@ class ReservaApiController
         $id = intval($id);
         $reserva = $this->servicio->obtener($id);
         $this->responder($reserva);
+    }
+
+    public function crear(): void
+    {
+        $valores = json_decode(file_get_contents('php://input'), true);
+        if(!is_array($valores))
+            {
+                throw new DatosNoValidos(["JSON"=>"json inválido"]);
+            }
+        $reserva = $this->servicio->crear($valores);
+        $this->responder($reserva, 201);
     }
 }
