@@ -41,5 +41,6 @@ $apiController = new ReservaApiController($servicio);
 $router->agregar("GET", '#^/api/reservas$#', function () use($apiController) {$apiController->listar($_GET);});
 $router->agregar("GET", '#^/api/reservas/(\d+)$#', function (string $id) use($apiController) {$apiController->obtener($id);});
 $router->agregar("POST", '#^/api/reservas$#', function () use($apiController) {$apiController->crear();});
+$router->agregar("PATCH", '#^/api/reservas/(\d+)/estado$#', function (string $id) use($apiController) {$apiController->cambiarEstado($id);});
 
 $router->despachar($metodo, $ruta);

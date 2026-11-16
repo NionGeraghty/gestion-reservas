@@ -41,4 +41,25 @@ class ReservaApiController
         $reserva = $this->servicio->crear($valores);
         $this->responder($reserva, 201);
     }
+
+    public function cambiarEstado(string $id): void
+    {
+        $id = intval($id);
+        $cuerpo = json_decode(file_get_contents('php://input'), true);
+        if(!is_array($cuerpo))
+            {
+                throw new DatosNoValidos(["JSON"=>"json inválido"]);
+            }
+        if(!array_key_exists("estado", $cuerpo))
+            {
+                throw new DatosNoValidos(["estado"=>"se necesita un estado"]);
+            }
+        if(!is_string($cuerpo["estado"]))
+            {
+                throw new DatosNoValidos(["estado"=>"formato del estado no válido"]);
+            }
+
+        $reserva = $this->servicio->cambiarEstado($id, $cuerpo["estado"]);
+        $this->responder($reserva);
+    }
 }
