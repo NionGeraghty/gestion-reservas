@@ -25,6 +25,6 @@ class Router
                         return $routes[$i]["accion"](...array_slice($coincidencias, 1));
                     }
             }
-        throw new RecursoNoEncontrado();
+        throw new RecursoNoEncontrado("Ruta inválida");
     }
 }
